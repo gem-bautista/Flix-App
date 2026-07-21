@@ -3,9 +3,8 @@ const global = {
 }
 
 async function displayPopularMovies() {
-
     const { results } = await fetchAPIData('movie/popular')
-    console.log(results)
+
     results.forEach(movie => {
         const div = document.createElement('div')
         div.classList.add('card')
@@ -59,10 +58,12 @@ async function displayPopularShows() {
 
 // fetch the specific movie when clicking the image.
 async function displayMovieDetails() {
+
     const movieId = window.location.search.split('=')[1]
     //the movie here is an object
     const movie = await fetchAPIData(`movie/${movieId}`)
     //Overlay for background image
+    console.log(movie)
     displayBackgroundImage('movie', movie.backdrop_path)
     const div = document.createElement('div')
     div.innerHTML = `
@@ -119,6 +120,7 @@ async function displayMovieDetails() {
 async function displayShowDetails() {
     const showId = window.location.search.split('=')[1]
     //the show here is an object
+    console.log(showId)
     const show = await fetchAPIData(`tv/${showId}`)
     //Overlay for background image
     console.log(show)
@@ -198,6 +200,55 @@ function displayBackgroundImage(type, backgroundPath) {
 
 }
 
+async function displaySlider() {
+    const { results } = await fetchAPIData('movie/now_playing')
+
+    results.forEach(movie => {
+        const div = document.createElement('div')
+        div.classList.add('swiper-slide')
+
+        div.innerHTML = `       
+            <a href="movie-details.html?id=${movie.id}">
+            ${movie.poster_path ?
+                `<img src="https://image.tmdb.org/t/p/w500${movie.poster_path}" alt="${movie.title}" />` :
+                `<img src="./images/no-image.jpg" alt="Movie Title" />`
+            }
+            </a>
+            <h4 class="swiper-rating">
+              <i class="fas fa-star text-secondary"></i> ${movie.vote_average.toFixed(1)}
+            </h4>`
+
+        document.querySelector('.swiper-wrapper').appendChild(div)
+    })
+
+    initSwiper()
+}
+
+function initSwiper() {
+    const swiper = new Swiper('.swiper', {
+        slidesPerView: 1,
+        spaceBetween: 30,
+        freeMode: true,
+        loop: true,
+        autoplay: {
+            delay: 4000,
+            disableOnInteraction: false
+        },
+        breakpoints: {
+            500: {
+                slidesPerView: 2
+            },
+            700: {
+                slidesPerView: 3
+            },
+            1200: {
+                slidesPerView: 4
+            }
+        }
+    })
+}
+
+
 // Used when loading
 function showSpinner() {
     document.querySelector('.spinner').classList.add('show')
@@ -242,6 +293,7 @@ function init() {
     switch (global.currentPage) {
         case '/':
         case '/index.html':
+            displaySlider()
             displayPopularMovies()
             break
         case '/shows.html':
